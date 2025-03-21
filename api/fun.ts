@@ -46,17 +46,30 @@ export default async function handler(request: Request): Promise<Response> {
   try {
     const resp = await fetch(forwardedRequest);
 
-    const contentType = resp.headers.get('Content-Type') || 'text/plain';
+    const contentType = resp.headers.get("Content-Type") || "text/plain";
+    let body;
     if (contentType.startsWith("text/")) {
       let respText = await resp.text();
       // Not optimal?
       for (let subst of substitutions) {
         respText = respText.replaceAll(subst.from, subst.to);
       }
-      return new Response(respText, resp);
+      body = respText;
     } else {
-      return resp;
+      body = resp.body;
     }
+
+    let headers = resp.headers;
+    const setCookies = headers.getSetCookie(); // I hate imperative programming.
+    headers.delete("Set-Cookie");
+    for (const setCookie of setCookies) {
+      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", `.wd.${domain}`)}; SameSite=Lax`);
+    }
+
+    return new Response(body, {
+      status: resp.status,
+      headers
+    })
   } catch (error) {
     console.error(error);
     return errResp;
