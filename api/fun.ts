@@ -22,10 +22,10 @@ const errResp = new Response(null, { status: 500 });
 
 const substitutions : { from: string | RegExp, to: string }[] = (() => {
   let result : { from: string | RegExp, to: string }[] = [];
-  result.push({ from: "http://d3g0gp89917ko0.cloudfront.net", to: "https://d3g0gp89917ko0.cloudfront.net" });
+  result.push({ from: /http:(\/\/|\\\/\\\/)d3g0gp89917ko0.cloudfront.net/g, to: "https:$1d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
+    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}`});
     result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
-    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}`});
   }
   return result;
 })();
