@@ -2,7 +2,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const domain = "obscurative.ru";
+const domain = ".wd.obscurative.ru";
 const proxyToRaw : Record<string, string> = {
   "scientific-alliance": "scientific-alliance"
 };
@@ -24,7 +24,7 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
   let result : { from: string | RegExp, to: string }[] = [];
   result.push({ from: "http://d3g0gp89917ko0.cloudfront.net", to: "https://d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
-    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}.wd.${domain}` } );
+    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
     result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}`});
   }
   return result;
@@ -32,7 +32,7 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
 
 export default async function handler(request: Request): Promise<Response> {
   const url: URL = new URL(request.url);
-  const space_host = url.hostname.split(".wd.");
+  const space_host = url.hostname.split(domain);
   if (space_host.length != 2) // Questionable
     return errResp;
 
@@ -40,13 +40,12 @@ export default async function handler(request: Request): Promise<Response> {
   if (to == null)
     return errResp;
 
-  let forwardedRequest = new Request(`http${space_host[0] == wikidotSpaceName ? "s" : ""}://${to}${url.pathname}`, request);
-  console.log(JSON.stringify(forwardedRequest));
+  let forwardedRequest = new Request(`http${space_host[0] == wikidotSpaceName ? "s" : ""}://${to}${url.pathname}${url.search}`, request);
 
   try {
     const resp = await fetch(forwardedRequest);
 
-    const contentType = resp.headers.get("Content-Type") || "text/plain";
+    const contentType = resp.headers.get("Content-Type") ?? "text/plain";
     let body;
     if (contentType.startsWith("text/")) {
       let respText = await resp.text();
@@ -63,7 +62,7 @@ export default async function handler(request: Request): Promise<Response> {
     const setCookies = headers.getSetCookie(); // I hate imperative programming.
     headers.delete("Set-Cookie");
     for (const setCookie of setCookies) {
-      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", `.wd.${domain}`)}; SameSite=Lax`);
+      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", domain)}; SameSite=Lax`);
     }
 
     return new Response(body, {
