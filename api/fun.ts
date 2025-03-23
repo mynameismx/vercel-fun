@@ -2,9 +2,9 @@ export const config = {
   runtime: 'edge',
 };
 
-const domain = ".wd.obscurative.ru";
+const domain = ".vercel.app";
 const proxyToRaw : Record<string, string> = {
-  "scientific-alliance": "scientific-alliance"
+  "castopia-wiki": "castopia-wiki"
 };
 const wikidotSpaceName = "wikidot";
 
