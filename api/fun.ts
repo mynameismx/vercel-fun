@@ -13,7 +13,7 @@ const proxyTo : Record<string, string> = (() => {
   result[wikidotSpaceName] = "www.wikidot.com";
   for (const proxy in proxyToRaw) {
     result[`${proxy}`] = `${proxyToRaw[proxy]}.wikidot.com`;
-    result[`files.${proxy}`] = `${proxyToRaw[proxy]}.wdfiles.com`;
+    result[`${proxy}`] = `${proxyToRaw[proxy]}.wdfiles.com`;
   }
   return result;
 })();
