@@ -2,13 +2,13 @@ export const config = {
   runtime: 'edge',
 };
 
-const domain = ".vercel.app";
+const domain = ".obscurative.ru";
 const proxyToRaw : Record<string, string> = {
   "castopia-wiki": "castopia-wiki"
 };
 const wikidotSpaceName = "wikidot";
 
-const proxyTo : Record<string, string> = (() => {
+const proxyTo : Record<string, strinscientific-allianceg> = (() => {
   let result = {};
   result[wikidotSpaceName] = "www.wikidot.com";
   for (const proxy in proxyToRaw) {
@@ -73,4 +73,4 @@ export default async function handler(request: Request): Promise<Response> {
     console.error(error);
     return errResp;
   }
-}
+  }
