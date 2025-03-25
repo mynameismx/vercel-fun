@@ -24,8 +24,8 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
   let result : { from: string | RegExp, to: string }[] = [];
   result.push({ from: /http:(\/\/|\\\/\\\/)d3g0gp89917ko0.cloudfront.net/g, to: "https:$1d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
-    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}`});
-    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
+    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}.wd${domain}`});
+    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}.wd${domain}` } );
   }
   return result;
 })();
