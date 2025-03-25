@@ -8,7 +8,7 @@ const proxyToRaw : Record<string, string> = {
 };
 const wikidotSpaceName = "wikidot";
 
-const proxyTo : Record<string, strinscientific-allianceg> = (() => {
+const proxyTo : Record<string, string> = (() => {
   let result = {};
   result[wikidotSpaceName] = "www.wikidot.com";
   for (const proxy in proxyToRaw) {
