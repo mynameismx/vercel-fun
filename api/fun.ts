@@ -62,7 +62,7 @@ export default async function handler(request: Request): Promise<Response> {
     const setCookies = headers.getSetCookie(); // I hate imperative programming.
     headers.delete("Set-Cookie");
     for (const setCookie of setCookies) {
-      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", domain)}; SameSite=Lax`);
+      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", `.${domain}`)}; SameSite=Lax`);
     }
 
     return new Response(body, {
