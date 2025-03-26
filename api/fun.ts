@@ -2,9 +2,9 @@ export const config = {
   runtime: 'edge',
 };
 
-const domain = ".obscurative.ru";
+const domain = "castopia.obscurative.ru";
 const proxyToRaw : Record<string, string> = {
-  "castopia-wiki": "castopia-wiki"
+  "": "castopia-wiki"
 };
 const wikidotSpaceName = "wikidot";
 
@@ -24,8 +24,8 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
   let result : { from: string | RegExp, to: string }[] = [];
   result.push({ from: /http:(\/\/|\\\/\\\/)d3g0gp89917ko0.cloudfront.net/g, to: "https:$1d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
-    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}.wd${domain}`});
-    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}.wd${domain}` } );
+    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}`});
+    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
   }
   return result;
 })();
@@ -62,7 +62,7 @@ export default async function handler(request: Request): Promise<Response> {
     const setCookies = headers.getSetCookie(); // I hate imperative programming.
     headers.delete("Set-Cookie");
     for (const setCookie of setCookies) {
-      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", `.wd${domain}`)}; SameSite=Lax`);
+      headers.append("Set-Cookie", `${setCookie.replace(".wikidot.com", domain)}; SameSite=Lax`);
     }
 
     return new Response(body, {
@@ -73,4 +73,4 @@ export default async function handler(request: Request): Promise<Response> {
     console.error(error);
     return errResp;
   }
-  }
+}
