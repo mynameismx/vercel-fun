@@ -31,11 +31,35 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
 })();
 
 async function replaceLinksInHTML(html: string): Promise<string> {
-   for (let subst of substitutions) {
-     html = html.replaceAll(subst.from, subst.to);
-   }
-   return html;
- }
+  for (let subst of substitutions) {
+    html = html.replaceAll(subst.from, subst.to);
+  }
+
+  const jquery = `<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>`;
+  const script = `
+    <script>
+      $(function() {
+        $('.html-block-iframe').load(function() {
+          var target = this;
+          var content = $(target).contents().find('body');
+          $(target).height($(content).outerHeight(true));
+
+          $(content).on("DOMSubtreeModified click", function (event) {
+            setTimeout(function() {
+              $(target).height($(content).outerHeight(true));
+            }, 400);
+          });
+        });
+      });
+    </script>
+  `;
+
+  if (html.includes('</head>')) {
+    html = html.replace('</head>', `${jquery}${script}</head>`);
+  }
+
+  return html;
+}
 
 export default async function handler(request: Request): Promise<Response> {
   const url: URL = new URL(request.url);
