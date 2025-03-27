@@ -3,12 +3,12 @@ export const config = {
 };
 
 const domain = "castopia.obscurative.ru";
-const proxyToRaw : Record<string, string> = {
+const proxyToRaw: Record<string, string> = {
   "": "castopia-wiki"
 };
 const wikidotSpaceName = "wikidot.";
 
-const proxyTo : Record<string, string> = (() => {
+const proxyTo: Record<string, string> = (() => {
   let result = {};
   result[wikidotSpaceName] = "www.wikidot.com";
   for (const proxy in proxyToRaw) {
@@ -20,25 +20,34 @@ const proxyTo : Record<string, string> = (() => {
 
 const errResp = new Response(null, { status: 500 });
 
-const substitutions : { from: string | RegExp, to: string }[] = (() => {
-  let result : { from: string | RegExp, to: string }[] = [];
+const substitutions: { from: string | RegExp, to: string }[] = (() => {
+  let result: { from: string | RegExp, to: string }[] = [];
   result.push({ from: /http:(\/\/|\\\/\\\/)d3g0gp89917ko0.cloudfront.net/g, to: "https:$1d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
-    result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}`});
-    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
+    result.push({ from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}` });
+    result.push({ from: new RegExp(`(["\']|:\\/\\/)?${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` });
   }
   return result;
 })();
 
+async function replaceLinksInHTML(html: string): Promise<string> {
+  for (let subst of substitutions) {
+    html = html.replaceAll(subst.from, subst.to);
+  }
+  return html;
+}
+
 export default async function handler(request: Request): Promise<Response> {
   const url: URL = new URL(request.url);
   const space_host = url.hostname.split(domain);
-  if (space_host.length != 2) // Questionable
+  if (space_host.length !== 2) {
     return errResp;
+  }
 
   const to: string | null = proxyTo[space_host[0]];
-  if (to == null)
+  if (to == null) {
     return errResp;
+  }
 
   let forwardedRequest = new Request(`http${space_host[0] == wikidotSpaceName ? "s" : ""}://${to}${url.pathname}${url.search}`, request);
 
@@ -49,10 +58,7 @@ export default async function handler(request: Request): Promise<Response> {
     let body;
     if (contentType.startsWith("text/")) {
       let respText = await resp.text();
-      // Not optimal?
-      for (let subst of substitutions) {
-        respText = respText.replaceAll(subst.from, subst.to);
-      }
+      respText = await replaceLinksInHTML(respText); // Обработка всех ссылок
       body = respText;
     } else {
       body = resp.body;
@@ -68,7 +74,7 @@ export default async function handler(request: Request): Promise<Response> {
     return new Response(body, {
       status: resp.status,
       headers
-    })
+    });
   } catch (error) {
     console.error(error);
     return errResp;
