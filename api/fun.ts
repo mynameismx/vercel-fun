@@ -25,7 +25,7 @@ const substitutions : { from: string | RegExp, to: string }[] = (() => {
   result.push({ from: /http:(\/\/|\\\/\\\/)d3g0gp89917ko0.cloudfront.net/g, to: "https:$1d3g0gp89917ko0.cloudfront.net" });
   for (const proxy in proxyTo) {
     result.push( { from: `http://${proxyTo[proxy]}`, to: `https://${proxy}${domain}`});
-    result.push( { from: new RegExp(`(["\']|:\\\/\\\/)${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
+    result.push( { from: new RegExp(`(["\']|:\\/\\/)?${proxyTo[proxy]}`, "g"), to: `$1${proxy}${domain}` } );
   }
   return result;
 })();
@@ -40,12 +40,14 @@ async function replaceLinksInHTML(html: string): Promise<string> {
 export default async function handler(request: Request): Promise<Response> {
   const url: URL = new URL(request.url);
   const space_host = url.hostname.split(domain);
-  if (space_host.length != 2) // Questionable
+  if (space_host.length !== 2) {
     return errResp;
+  }
 
   const to: string | null = proxyTo[space_host[0]];
-  if (to == null)
+  if (to == null) {
     return errResp;
+  }
 
   let forwardedRequest = new Request(`http${space_host[0] == wikidotSpaceName ? "s" : ""}://${to}${url.pathname}${url.search}`, request);
 
