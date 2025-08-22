@@ -4,7 +4,7 @@ export const config = {
 
 const domain = "castopia.obscurative.ru";
 const proxyToRaw : Record<string, string> = {
-  "": "castopia-wiki"
+  "": "obscurative"
 };
 const wikidotSpaceName = "wikidot.";
 
